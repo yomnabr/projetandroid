@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">tunisiePromos</string>
+
+    <!-- Auth -->
+    <string name="login">Connexion</string>
+    <string name="register">Créer un compte</string>
+    <string name="email">Email</string>
+    <string name="password">Mot de passe</string>
+    <string name="logout">Déconnexion</string>
+
+    <!-- Promotions -->
+    <string name="add_promo">Ajouter une promotion</string>
+    <string name="title">Titre</string>
+    <string name="description">Description</string>
+    <string name="image_url">URL Image</string>
+
+    <!-- Buttons -->
+    <string name="btn_add">Ajouter</string>
+
+    <!-- Details -->
+    <string name="promo_details">Détails Promotion</string>
+</resources>
