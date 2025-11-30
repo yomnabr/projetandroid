@@ -2,10 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Permissions -->
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <!-- SUPPRIMER : <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/> -->
+    <!-- Permissions nécessaires -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -15,30 +15,53 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Tunipromos"
-        android:usesCleartextTraffic="true">
+        android:theme="@style/Theme.Tunipromos">
 
+        <!-- Splash Activity - Point d'entrée -->
         <activity
             android:name=".ui.SplashActivity"
             android:exported="true"
-            android:theme="@style/Theme.Tunipromos">
+            android:theme="@style/Theme.Tunipromos.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".auth.LoginActivity" android:exported="false"/>
-        <activity android:name=".auth.RegisterActivity" android:exported="false"/>
-        <activity android:name=".ui.MainActivity" android:exported="false"/>
-        <activity android:name=".ui.AddPromotionActivity" android:exported="false"/>
-        <activity android:name=".ui.PromotionDetailsActivity" android:exported="false"/>
-        <activity android:name=".ui.ProfileActivity" android:exported="false"/>
+        <!-- Activities d'authentification -->
+        <activity android:name=".auth.LoginActivity"
+            android:windowSoftInputMode="adjustResize"/>
+        <activity android:name=".auth.RegisterActivity"
+            android:windowSoftInputMode="adjustResize"/>
 
-        <!-- SUPPRIMER TOUTE CETTE SECTION FCM :
-        <service android:name=".services.MyFirebaseMessagingService"...>
-        <meta-data android:name="com.google.firebase.messaging.../>
-        -->
+        <!-- Activities principales -->
+        <activity android:name=".ui.MainActivity" />
+        <activity android:name=".ui.AddPromotionActivity"
+            android:windowSoftInputMode="adjustResize"/>
+        <activity android:name=".ui.PromotionDetailsActivity" />
+        <activity android:name=".ui.ProfileActivity" />
+        <activity android:name=".ui.PreferencesActivity"
+            android:windowSoftInputMode="adjustResize"/>
+
+        <!-- Service Firebase Cloud Messaging -->
+        <service
+            android:name=".service.MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- Métadonnées Firebase -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/ic_launcher" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorPrimary" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/default_notification_channel_id" />
 
     </application>
 
