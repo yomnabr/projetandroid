@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "805909797912",
+    "firebase_url": "https://tunipromosfinale-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "tunipromosfinale",
+    "storage_bucket": "tunipromosfinale.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:805909797912:android:365d93c5b3fb0578b4776d",
+        "android_client_info": {
+          "package_name": "com.example.tunipromos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNOPv8jhVlcMuqVw8A--w8N26E1eBfoA0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

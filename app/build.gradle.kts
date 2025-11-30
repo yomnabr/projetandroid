@@ -13,7 +13,6 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -28,39 +27,44 @@ android {
     }
 
     compileOptions {
-        // Projet en Java, mais compilé avec Java 11
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
 }
 
 dependencies {
-    // --- Dépendances de base ---
+    // Dépendances de base
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+
+    // Glide pour images
     implementation("com.github.bumptech.glide:glide:4.16.0")
-    implementation(libs.firebase.database)
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
-    // --- Tests ---
+
+    // CardView et CoordinatorLayout
+    implementation("androidx.cardview:cardview:1.0.0")
+    implementation("androidx.coordinatorlayout:coordinatorlayout:1.2.0")
+
+    // Tests
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-    // --- Firebase via BoM ---
+    // Firebase via BoM
     implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
 
-    // Authentification
+    // GARDER ces 3 services GRATUITS :
     implementation("com.google.firebase:firebase-auth")
-
-    // Firestore
     implementation("com.google.firebase:firebase-firestore")
-
-    // Storage
     implementation("com.google.firebase:firebase-storage")
 
-    // --- ViewModel + LiveData (pour Java aussi) ---
+    // SUPPRIMER FCM (payant) :
+    // implementation("com.google.firebase:firebase-messaging")
+    // implementation("com.google.firebase:firebase-analytics")
+
+    // ViewModel + LiveData
     implementation("androidx.lifecycle:lifecycle-viewmodel:2.8.4")
     implementation("androidx.lifecycle:lifecycle-livedata:2.8.4")
 }
