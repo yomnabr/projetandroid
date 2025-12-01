@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tunipromos.R;
@@ -13,20 +12,26 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class SplashActivity extends AppCompatActivity {
 
+    private static final int SPLASH_DELAY = 2000; // 2 secondes
+    private FirebaseAuth auth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splash);
+        setContentView(R.layout.splash_activity);
 
-        // Délai de 2 secondes pour afficher le splash
+        auth = FirebaseAuth.getInstance();
+
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             // Vérifier si l'utilisateur est déjà connecté
-            if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-                startActivity(new Intent(this, MainActivity.class));
+            if (auth.getCurrentUser() != null) {
+                // Utilisateur connecté, aller vers MainActivity
+                startActivity(new Intent(SplashActivity.this, MainActivity.class));
             } else {
-                startActivity(new Intent(this, LoginActivity.class));
+                // Utilisateur non connecté, aller vers LoginActivity
+                startActivity(new Intent(SplashActivity.this, LoginActivity.class));
             }
             finish();
-        }, 2000);
+        }, SPLASH_DELAY);
     }
 }

@@ -14,13 +14,11 @@ import java.util.List;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    EditText etDisplayName, etLocation;
+    EditText etDisplayName;
     TextView tvEmail;
-    Button btnSave, btnLogout, btnPreferences;
+    Button btnSave, btnLogout;
     CheckBox cbAlimentation, cbElectronique, cbMode, cbMaison, cbBeaute, cbSport;
     CheckBox cbNotifications;
-    SeekBar seekRadius;
-    TextView tvRadius;
 
     FirebaseAuth auth = FirebaseAuth.getInstance();
     FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -40,10 +38,8 @@ public class ProfileActivity extends AppCompatActivity {
     private void initViews() {
         tvEmail = findViewById(R.id.tvEmail);
         etDisplayName = findViewById(R.id.etDisplayName);
-        etLocation = findViewById(R.id.etLocation);
         btnSave = findViewById(R.id.btnSave);
         btnLogout = findViewById(R.id.btnLogout);
-        btnPreferences = findViewById(R.id.btnPreferences);
 
         // Catégories
         cbAlimentation = findViewById(R.id.cbAlimentation);
@@ -55,26 +51,38 @@ public class ProfileActivity extends AppCompatActivity {
 
         // Notifications
         cbNotifications = findViewById(R.id.cbNotifications);
-        seekRadius = findViewById(R.id.seekRadius);
-        tvRadius = findViewById(R.id.tvRadius);
+
+        // Supprimer les références aux vues qui n'existent plus dans le modèle simple
+        // etLocation, seekRadius, tvRadius, btnPreferences
     }
 
     private void loadUserData() {
+        if (auth.getCurrentUser() == null) {
+            // Utilisateur non connecté, redirection vers login
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
+        }
+
         String uid = auth.getCurrentUser().getUid();
 
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(doc -> {
                     if (doc.exists()) {
                         currentUser = doc.toObject(User.class);
-                        displayUserData();
+                        if (currentUser != null) {
+                            displayUserData();
+                        }
                     } else {
                         // Créer un nouveau profil
                         currentUser = new User(
                                 uid,
                                 auth.getCurrentUser().getEmail(),
-                                "Utilisateur",
-                                "consumer"
+                                "Utilisateur"
                         );
+                        // Sauvegarder le nouvel utilisateur dans Firestore
+                        db.collection("users").document(uid).set(currentUser);
+                        displayUserData();
                     }
                 })
                 .addOnFailureListener(e ->
@@ -84,56 +92,30 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void displayUserData() {
         tvEmail.setText(currentUser.getEmail());
-        etDisplayName.setText(currentUser.getDisplayName());
+        etDisplayName.setText(currentUser.getName());
+        cbNotifications.setChecked(currentUser.isNotificationsEnabled());
 
-        if (currentUser.getPreferences() != null) {
-            User.UserPreferences prefs = currentUser.getPreferences();
-
-            etLocation.setText(prefs.getLocation());
-            cbNotifications.setChecked(prefs.isNotificationsEnabled());
-            seekRadius.setProgress(prefs.getNotificationRadius());
-            tvRadius.setText(prefs.getNotificationRadius() + " km");
-
-            // Charger les catégories préférées
-            List<String> categories = prefs.getCategories();
-            if (categories != null) {
-                cbAlimentation.setChecked(categories.contains("alimentation"));
-                cbElectronique.setChecked(categories.contains("electronique"));
-                cbMode.setChecked(categories.contains("mode"));
-                cbMaison.setChecked(categories.contains("maison"));
-                cbBeaute.setChecked(categories.contains("beaute"));
-                cbSport.setChecked(categories.contains("sport"));
-            }
+        // Charger les catégories préférées
+        List<String> categories = currentUser.getCategories();
+        if (categories != null) {
+            cbAlimentation.setChecked(categories.contains("alimentation"));
+            cbElectronique.setChecked(categories.contains("electronique"));
+            cbMode.setChecked(categories.contains("mode"));
+            cbMaison.setChecked(categories.contains("maison"));
+            cbBeaute.setChecked(categories.contains("beaute"));
+            cbSport.setChecked(categories.contains("sport"));
         }
     }
 
     private void setupListeners() {
-        seekRadius.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                tvRadius.setText(progress + " km");
-            }
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
-        });
-
         btnSave.setOnClickListener(v -> saveProfile());
         btnLogout.setOnClickListener(v -> logout());
     }
 
     private void saveProfile() {
         // Mettre à jour les informations de base
-        currentUser.setDisplayName(etDisplayName.getText().toString());
-
-        // Mettre à jour les préférences
-        User.UserPreferences prefs = currentUser.getPreferences();
-        if (prefs == null) prefs = new User.UserPreferences();
-
-        prefs.setLocation(etLocation.getText().toString());
-        prefs.setNotificationsEnabled(cbNotifications.isChecked());
-        prefs.setNotificationRadius(seekRadius.getProgress());
+        currentUser.setName(etDisplayName.getText().toString());
+        currentUser.setNotificationsEnabled(cbNotifications.isChecked());
 
         // Catégories sélectionnées
         List<String> selectedCategories = new ArrayList<>();
@@ -144,8 +126,7 @@ public class ProfileActivity extends AppCompatActivity {
         if (cbBeaute.isChecked()) selectedCategories.add("beaute");
         if (cbSport.isChecked()) selectedCategories.add("sport");
 
-        prefs.setCategories(selectedCategories);
-        currentUser.setPreferences(prefs);
+        currentUser.setCategories(selectedCategories);
 
         // Sauvegarder dans Firestore
         db.collection("users").document(currentUser.getUid())

@@ -1,18 +1,12 @@
 package com.example.tunipromos.adapter;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
-
+import android.view.*;
+import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
+import com.bumptech.glide.Glide;
 import com.example.tunipromos.R;
 import com.example.tunipromos.models.Promotion;
-import com.bumptech.glide.Glide;
-
 import java.util.List;
 
 public class PromotionAdapter extends RecyclerView.Adapter<PromotionAdapter.ViewHolder> {
@@ -20,7 +14,6 @@ public class PromotionAdapter extends RecyclerView.Adapter<PromotionAdapter.View
     private List<Promotion> list;
     private OnPromotionClickListener listener;
 
-    // Interface pour le click
     public interface OnPromotionClickListener {
         void onPromotionClick(Promotion promotion);
     }
@@ -45,51 +38,37 @@ public class PromotionAdapter extends RecyclerView.Adapter<PromotionAdapter.View
         h.title.setText(p.getTitle());
         h.desc.setText(p.getDescription());
 
-        // Afficher la catégorie et le pourcentage de réduction
+        // Catégorie
         if (p.getCategory() != null) {
             h.category.setVisibility(View.VISIBLE);
-            h.category.setText(getCategoryEmoji(p.getCategory()) + " " + p.getCategory());
+            h.category.setText(p.getCategory());
         } else {
             h.category.setVisibility(View.GONE);
         }
 
-        if (p.getDiscountPercentage() > 0) {
+        // Réduction
+        if (p.getDiscount() > 0) {
             h.discount.setVisibility(View.VISIBLE);
-            h.discount.setText("-" + p.getDiscountPercentage() + "%");
+            h.discount.setText("-" + p.getDiscount() + "%");
         } else {
             h.discount.setVisibility(View.GONE);
         }
 
-        // Charger l'image
+        // Image
         Glide.with(h.img.getContext())
                 .load(p.getImageUrl())
                 .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher)
                 .into(h.img);
 
-        // Click listener
+        // Click
         h.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onPromotionClick(p);
-            }
+            if (listener != null) listener.onPromotionClick(p);
         });
     }
 
     @Override
     public int getItemCount() {
         return list.size();
-    }
-
-    private String getCategoryEmoji(String category) {
-        switch (category.toLowerCase()) {
-            case "alimentation": return "🍎";
-            case "electronique": return "📱";
-            case "mode": return "👔";
-            case "maison": return "🏠";
-            case "beaute": return "💄";
-            case "sport": return "⚽";
-            default: return "📦";
-        }
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

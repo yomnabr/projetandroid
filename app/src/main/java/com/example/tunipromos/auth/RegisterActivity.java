@@ -1,12 +1,10 @@
 package com.example.tunipromos.auth;
-
+import com.example.tunipromos.R; // Pas android.R
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.*;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.tunipromos.R;
 import com.example.tunipromos.models.User;
 import com.google.firebase.auth.FirebaseAuth;
@@ -16,123 +14,68 @@ public class RegisterActivity extends AppCompatActivity {
 
     EditText etName, etEmail, etPass;
     Button btnRegister;
-    TextView btnGoLogin;
     ProgressBar progressBar;
-
-    FirebaseAuth auth = FirebaseAuth.getInstance();
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        initViews();
-        setupListeners();
-    }
-
-    private void initViews() {
         etName = findViewById(R.id.etName);
         etEmail = findViewById(R.id.etEmail);
         etPass = findViewById(R.id.etPassword);
         btnRegister = findViewById(R.id.btnRegister);
-        btnGoLogin = findViewById(R.id.btnGoLogin);
         progressBar = findViewById(R.id.progressBar);
-    }
 
-    private void setupListeners() {
-        btnRegister.setOnClickListener(v -> registerUser());
+        btnRegister.setOnClickListener(v -> register());
 
-        btnGoLogin.setOnClickListener(v -> {
+        findViewById(R.id.btnGoLogin).setOnClickListener(v -> {
             startActivity(new Intent(this, LoginActivity.class));
             finish();
         });
     }
 
-    private void registerUser() {
+    private void register() {
         String name = etName.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
         String password = etPass.getText().toString().trim();
 
-        // Validation
-        if (TextUtils.isEmpty(name)) {
-            etName.setError("Le nom est requis");
-            etName.requestFocus();
-            return;
-        }
-
-        if (TextUtils.isEmpty(email)) {
-            etEmail.setError("L'email est requis");
-            etEmail.requestFocus();
-            return;
-        }
-
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            etEmail.setError("Email invalide");
-            etEmail.requestFocus();
-            return;
-        }
-
-        if (TextUtils.isEmpty(password)) {
-            etPass.setError("Le mot de passe est requis");
-            etPass.requestFocus();
+        // Validation simple
+        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
+            Toast.makeText(this, "Remplissez tous les champs", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (password.length() < 6) {
-            etPass.setError("Le mot de passe doit contenir au moins 6 caractères");
-            etPass.requestFocus();
+            Toast.makeText(this, "Mot de passe trop court (min 6 caractères)", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Afficher le progressBar
         progressBar.setVisibility(ProgressBar.VISIBLE);
-        btnRegister.setEnabled(false);
 
-        // Créer le compte Firebase Auth
-        auth.createUserWithEmailAndPassword(email, password)
+        // Créer compte Firebase
+        FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener(authResult -> {
-                    // Récupérer l'UID de l'utilisateur créé
                     String uid = authResult.getUser().getUid();
 
-                    // Créer le profil utilisateur dans Firestore
-                    User newUser = new User(uid, email, name, "consumer");
+                    // Créer profil dans Firestore
+                    User user = new User(uid, email, name);
 
-                    db.collection("users").document(uid)
-                            .set(newUser)
+                    FirebaseFirestore.getInstance().collection("users").document(uid)
+                            .set(user)
                             .addOnSuccessListener(aVoid -> {
-                                progressBar.setVisibility(ProgressBar.GONE);
-                                Toast.makeText(RegisterActivity.this,
-                                        "Compte créé avec succès!", Toast.LENGTH_SHORT).show();
-
-                                // Rediriger vers LoginActivity
-                                startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+                                Toast.makeText(this, "Compte créé !", Toast.LENGTH_SHORT).show();
+                                startActivity(new Intent(this, LoginActivity.class));
                                 finish();
                             })
                             .addOnFailureListener(e -> {
                                 progressBar.setVisibility(ProgressBar.GONE);
-                                btnRegister.setEnabled(true);
-                                Toast.makeText(RegisterActivity.this,
-                                        "Erreur lors de la création du profil: " + e.getMessage(),
-                                        Toast.LENGTH_LONG).show();
+                                Toast.makeText(this, "Erreur: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             });
                 })
                 .addOnFailureListener(e -> {
                     progressBar.setVisibility(ProgressBar.GONE);
-                    btnRegister.setEnabled(true);
-
-                    String errorMessage = "Erreur lors de l'inscription";
-                    if (e.getMessage() != null) {
-                        if (e.getMessage().contains("already in use")) {
-                            errorMessage = "Cet email est déjà utilisé";
-                        } else if (e.getMessage().contains("network error")) {
-                            errorMessage = "Erreur de connexion Internet";
-                        } else if (e.getMessage().contains("weak password")) {
-                            errorMessage = "Mot de passe trop faible";
-                        }
-                    }
-
-                    Toast.makeText(RegisterActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Erreur: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 }

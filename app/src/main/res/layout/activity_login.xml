@@ -79,7 +79,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <!-- Bouton vers Register -->
+        <!-- Dans votre activity_login.xml -->
         <TextView
             android:id="@+id/btnGoRegister"
             android:text="Pas de compte ? Créer un compte"
@@ -90,6 +90,5 @@
             android:layout_marginTop="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
-
     </LinearLayout>
 </ScrollView>

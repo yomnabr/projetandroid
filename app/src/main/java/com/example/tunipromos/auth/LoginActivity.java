@@ -2,88 +2,92 @@ package com.example.tunipromos.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.widget.*;
-
+import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.tunipromos.R;
 import com.example.tunipromos.ui.MainActivity;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity {
 
-    EditText etEmail, etPass;
-    Button btnLogin;
-    TextView btnGoRegister;
-    ProgressBar progressBar;
-    FirebaseAuth auth = FirebaseAuth.getInstance();
+    private TextInputEditText etEmail, etPassword;
+    private Button btnLogin;
+    private TextView btnGoRegister;
+    private ProgressBar progressBar;
+
+    private FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        auth = FirebaseAuth.getInstance();
+
+        // Vérifier si l'utilisateur est déjà connecté
+        if (auth.getCurrentUser() != null) {
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
+            return;
+        }
+
+        initViews();
+        setupListeners();
+    }
+
+    private void initViews() {
         etEmail = findViewById(R.id.etEmail);
-        etPass = findViewById(R.id.etPassword);
+        etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
         btnGoRegister = findViewById(R.id.btnGoRegister);
         progressBar = findViewById(R.id.progressBar);
+    }
 
+    private void setupListeners() {
+        // Listener pour le bouton de connexion
         btnLogin.setOnClickListener(v -> loginUser());
 
-        btnGoRegister.setOnClickListener(v ->
-                startActivity(new Intent(this, RegisterActivity.class)));
+        // CORRECTION : Utiliser RegisterActivity
+        btnGoRegister.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void loginUser() {
         String email = etEmail.getText().toString().trim();
-        String password = etPass.getText().toString().trim();
+        String password = etPassword.getText().toString().trim();
 
-        // Validation
-        if (TextUtils.isEmpty(email)) {
-            etEmail.setError("L'email est requis");
+        if (email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Veuillez remplir tous les champs", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (TextUtils.isEmpty(password)) {
-            etPass.setError("Le mot de passe est requis");
-            return;
-        }
-
-        if (password.length() < 6) {
-            etPass.setError("Le mot de passe doit contenir au moins 6 caractères");
-            return;
-        }
-
-        // Afficher le progressBar
-        progressBar.setVisibility(ProgressBar.VISIBLE);
+        // Afficher la progress bar
+        progressBar.setVisibility(android.view.View.VISIBLE);
         btnLogin.setEnabled(false);
 
-        // Connexion Firebase
+        // Authentification Firebase
         auth.signInWithEmailAndPassword(email, password)
-                .addOnSuccessListener(authResult -> {
-                    progressBar.setVisibility(ProgressBar.GONE);
-                    Toast.makeText(LoginActivity.this, "Connexion réussie!", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                    finish();
-                })
-                .addOnFailureListener(e -> {
-                    progressBar.setVisibility(ProgressBar.GONE);
+                .addOnCompleteListener(this, task -> {
+                    progressBar.setVisibility(android.view.View.GONE);
                     btnLogin.setEnabled(true);
 
-                    String errorMessage = "Erreur de connexion";
-                    if (e.getMessage() != null) {
-                        if (e.getMessage().contains("no user record")) {
-                            errorMessage = "Aucun compte trouvé avec cet email";
-                        } else if (e.getMessage().contains("password is invalid")) {
-                            errorMessage = "Mot de passe incorrect";
-                        } else if (e.getMessage().contains("network error")) {
-                            errorMessage = "Erreur de connexion Internet";
-                        }
+                    if (task.isSuccessful()) {
+                        // Connexion réussie
+                        Toast.makeText(LoginActivity.this, "Connexion réussie!", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        // Échec de la connexion
+                        Toast.makeText(LoginActivity.this, "Échec de la connexion: " +
+                                task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
-
-                    Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
                 });
     }
 }

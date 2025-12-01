@@ -2,9 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Permissions nécessaires -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
@@ -15,7 +13,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Tunipromos">
+        android:theme="@style/Theme.Tunipromos"
+        tools:targetApi="31">
 
         <!-- Splash Activity - Point d'entrée -->
         <activity
@@ -29,39 +28,38 @@
         </activity>
 
         <!-- Activities d'authentification -->
-        <activity android:name=".auth.LoginActivity"
+        <activity
+            android:name=".auth.LoginActivity"
+            android:exported="false"
             android:windowSoftInputMode="adjustResize"/>
-        <activity android:name=".auth.RegisterActivity"
+
+        <activity
+            android:name=".auth.RegisterActivity"
+            android:exported="false"
             android:windowSoftInputMode="adjustResize"/>
 
         <!-- Activities principales -->
-        <activity android:name=".ui.MainActivity" />
-        <activity android:name=".ui.AddPromotionActivity"
-            android:windowSoftInputMode="adjustResize"/>
-        <activity android:name=".ui.PromotionDetailsActivity" />
-        <activity android:name=".ui.ProfileActivity" />
-        <activity android:name=".ui.PreferencesActivity"
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="false"/>
+
+        <activity
+            android:name=".ui.AddPromotionActivity"
+            android:exported="false"
             android:windowSoftInputMode="adjustResize"/>
 
-        <!-- Service Firebase Cloud Messaging -->
-        <service
-            android:name=".service.MyFirebaseMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
+        <activity
+            android:name=".ui.PromotionDetailsActivity"
+            android:exported="false"/>
 
-        <!-- Métadonnées Firebase -->
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@mipmap/ic_launcher" />
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/colorPrimary" />
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="@string/default_notification_channel_id" />
+        <activity
+            android:name=".ui.ProfileActivity"
+            android:exported="false"/>
+
+        <activity
+            android:name=".ui.PreferencesActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
 
     </application>
 
