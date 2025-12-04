@@ -55,14 +55,12 @@ dependencies {
     // Firebase via BoM
     implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
 
-    // GARDER ces 3 services GRATUITS :
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-storage")
-
-    // SUPPRIMER FCM (payant) :
-    // implementation("com.google.firebase:firebase-messaging")
-    // implementation("com.google.firebase:firebase-analytics")
+    // SERVICES Firebase GRATUITS (tous dans le plan Spark gratuit) :
+    implementation("com.google.firebase:firebase-auth")        // Authentification
+    implementation("com.google.firebase:firebase-firestore")   // Base de données
+    implementation("com.google.firebase:firebase-storage")     // Stockage fichiers
+    implementation("com.google.firebase:firebase-messaging")   // Notifications push (GRATUIT)
+    implementation("com.google.firebase:firebase-analytics")   // Analytics (GRATUIT)
 
     // ViewModel + LiveData
     implementation("androidx.lifecycle:lifecycle-viewmodel:2.8.4")

@@ -1,12 +1,18 @@
 package com.example.tunipromos.adapter;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.view.*;
 import android.widget.*;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
 import com.example.tunipromos.R;
 import com.example.tunipromos.models.Promotion;
+
 import java.util.List;
 
 public class PromotionAdapter extends RecyclerView.Adapter<PromotionAdapter.ViewHolder> {
@@ -54,11 +60,32 @@ public class PromotionAdapter extends RecyclerView.Adapter<PromotionAdapter.View
             h.discount.setVisibility(View.GONE);
         }
 
-        // Image
-        Glide.with(h.img.getContext())
-                .load(p.getImageUrl())
-                .placeholder(R.mipmap.ic_launcher)
-                .into(h.img);
+        // 🔹 Image : priorité à base64Image, sinon imageUrl, sinon placeholder
+        boolean imageSet = false;
+
+        if (p.getBase64Image() != null && !p.getBase64Image().isEmpty()) {
+            try {
+                byte[] decodedBytes = Base64.decode(p.getBase64Image(), Base64.DEFAULT);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+                h.img.setImageBitmap(bitmap);
+                imageSet = true;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (!imageSet) {
+            String url = p.getImageUrl();
+            if (url != null && !url.isEmpty()) {
+                Glide.with(h.img.getContext())
+                        .load(url)
+                        .placeholder(R.mipmap.ic_launcher)
+                        .into(h.img);
+            } else {
+                // Aucun visuel dispo → placeholder local
+                h.img.setImageResource(R.mipmap.ic_launcher);
+            }
+        }
 
         // Click
         h.itemView.setOnClickListener(v -> {
@@ -68,7 +95,7 @@ public class PromotionAdapter extends RecyclerView.Adapter<PromotionAdapter.View
 
     @Override
     public int getItemCount() {
-        return list.size();
+        return list != null ? list.size() : 0;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

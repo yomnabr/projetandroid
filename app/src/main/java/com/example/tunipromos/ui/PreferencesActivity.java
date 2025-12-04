@@ -5,8 +5,8 @@ import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.tunipromos.R;
 import com.example.tunipromos.models.User;
+import com.example.tunipromos.repository.UserRepository;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,11 +16,14 @@ public class PreferencesActivity extends AppCompatActivity {
     CheckBox cbElectronique, cbVetements, cbAlimentation, cbBeaute, cbSport, cbMaison;
     Button btnSave;
     ProgressBar progressBar;
+    UserRepository userRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preferences);
+
+        userRepository = new UserRepository();
 
         switchNotif = findViewById(R.id.switchNotifications);
         cbElectronique = findViewById(R.id.cbElectronique);
@@ -40,7 +43,7 @@ public class PreferencesActivity extends AppCompatActivity {
     private void loadPreferences() {
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        FirebaseFirestore.getInstance().collection("users").document(uid).get()
+        userRepository.getUser(uid)
                 .addOnSuccessListener(doc -> {
                     if (doc.exists()) {
                         User user = doc.toObject(User.class);
@@ -63,22 +66,24 @@ public class PreferencesActivity extends AppCompatActivity {
 
     private void savePreferences() {
         List<String> categories = new ArrayList<>();
-        if (cbElectronique.isChecked()) categories.add("Électronique");
-        if (cbVetements.isChecked()) categories.add("Vêtements");
-        if (cbAlimentation.isChecked()) categories.add("Alimentation");
-        if (cbBeaute.isChecked()) categories.add("Beauté");
-        if (cbSport.isChecked()) categories.add("Sport");
-        if (cbMaison.isChecked()) categories.add("Maison");
+        if (cbElectronique.isChecked())
+            categories.add("Électronique");
+        if (cbVetements.isChecked())
+            categories.add("Vêtements");
+        if (cbAlimentation.isChecked())
+            categories.add("Alimentation");
+        if (cbBeaute.isChecked())
+            categories.add("Beauté");
+        if (cbSport.isChecked())
+            categories.add("Sport");
+        if (cbMaison.isChecked())
+            categories.add("Maison");
 
         progressBar.setVisibility(ProgressBar.VISIBLE);
 
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        FirebaseFirestore.getInstance().collection("users").document(uid)
-                .update(
-                        "categories", categories,
-                        "notificationsEnabled", switchNotif.isChecked()
-                )
+        userRepository.updateUserPreferences(uid, categories, switchNotif.isChecked())
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(this, "Préférences sauvegardées", Toast.LENGTH_SHORT).show();
                     finish();

@@ -20,8 +20,9 @@ public class ProfileActivity extends AppCompatActivity {
     CheckBox cbAlimentation, cbElectronique, cbMode, cbMaison, cbBeaute, cbSport;
     CheckBox cbNotifications;
 
-    FirebaseAuth auth = FirebaseAuth.getInstance();
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    // Déclaration des variables Firebase
+    FirebaseAuth auth;
+    FirebaseFirestore db;
 
     User currentUser;
 
@@ -29,6 +30,10 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+
+        // Initialisation de Firebase Auth et Firestore
+        auth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
         initViews();
         loadUserData();
@@ -51,9 +56,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         // Notifications
         cbNotifications = findViewById(R.id.cbNotifications);
-
-        // Supprimer les références aux vues qui n'existent plus dans le modèle simple
-        // etLocation, seekRadius, tvRadius, btnPreferences
     }
 
     private void loadUserData() {
@@ -74,15 +76,18 @@ public class ProfileActivity extends AppCompatActivity {
                             displayUserData();
                         }
                     } else {
-                        // Créer un nouveau profil
+                        // Créer un nouveau profil avec le bon constructeur
+                        // Votre constructeur attend 4 paramètres : (uid, email, name, role)
                         currentUser = new User(
                                 uid,
                                 auth.getCurrentUser().getEmail(),
-                                "Utilisateur"
+                                "Utilisateur",  // Nom par défaut
+                                "consumer"      // Rôle par défaut
                         );
+
                         // Sauvegarder le nouvel utilisateur dans Firestore
-                        db.collection("users").document(uid).set(currentUser);
-                        displayUserData();
+                        db.collection("users").document(uid).set(currentUser)
+                                .addOnSuccessListener(aVoid -> displayUserData());
                     }
                 })
                 .addOnFailureListener(e ->
@@ -91,6 +96,8 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void displayUserData() {
+        if (currentUser == null) return;
+
         tvEmail.setText(currentUser.getEmail());
         etDisplayName.setText(currentUser.getName());
         cbNotifications.setChecked(currentUser.isNotificationsEnabled());
@@ -113,6 +120,8 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void saveProfile() {
+        if (currentUser == null) return;
+
         // Mettre à jour les informations de base
         currentUser.setName(etDisplayName.getText().toString());
         currentUser.setNotificationsEnabled(cbNotifications.isChecked());
